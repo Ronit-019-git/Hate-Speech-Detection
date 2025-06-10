@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hate Speech Detection System | AI Content Moderation</title>
+    <meta name="description" content="Enterprise-grade AI solution for detecting hate speech and offensive content with advanced natural language processing">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #3b82f6;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --gray-900: #111827;
+            --gray-800: #1f2937;
+            --gray-700: #374151;
+            --gray-600: #4b5563;
+            --gray-100: #f3f4f6;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: var(--gray-900);
+            line-height: 1.6;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Main Container */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 1rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.2rem;
+            color: var(--gray-900);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+            font-weight: 400;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        /* Card */
+        .card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Input Section */
+        .input-section {
+            margin-bottom: 2rem;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 1rem;
+            color: var(--gray-800);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            color: var(--gray-800);
+            font-size: 1rem;
+            min-height: 180px;
+            resize: vertical;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea::placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        /* Button */
+        .button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .button:hover {
+            background: var(--primary-dark);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            background: var(--primary-light);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Result Section */
+        .result-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result {
+            padding: 2rem;
+            border-radius: 8px;
+            display: none;
+            flex: 1;
+            background: white;
+            border: 1px solid #e5e7eb;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .result h2 {
+            color: var(--gray-900);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .result-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .result-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: var(--gray-800);
+            font-size: 1rem;
+        }
+
+        .result-value {
+            color: var(--gray-700);
+            line-height: 1.6;
+            padding-left: 1rem;
+            border-left: 2px solid #e5e7eb;
+        }
+
+        /* Prediction Styles */
+        .prediction {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            gap: 0.6rem;
+            font-size: 0.875rem;
+        }
+
+        .prediction-icon {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .hate {
+            color: var(--danger);
+            background: rgba(220, 38, 38, 0.1);
+        }
+
+        .hate .prediction-icon {
+            background: var(--danger);
+        }
+
+        .offensive {
+            color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .offensive .prediction-icon {
+            background: var(--warning);
+        }
+
+        .clean {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .clean .prediction-icon {
+            background: var(--success);
+        }
+
+        /* Confidence Meter */
+        .confidence-meter {
+            margin-top: 0.5rem;
+            background: #f3f4f6;
+            border-radius: 6px;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .meter-container {
+            height: 8px;
+            border-radius: 4px;
+            background: #e5e7eb;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .meter-bar {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--primary);
+            width: 0%;
+            transition: width 1s ease, background-color 1s ease;
+            position: relative;
+        }
+
+        .meter-value {
+            display: block;
+            margin-top: 5px;
+            font-family: 'Roboto Mono', monospace;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+        }
+
+        /* Error Message */
+        .error {
+            color: var(--danger);
+            background: rgba(220, 38, 38, 0.05);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            display: none;
+            animation: shakeX 0.5s;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1.5rem 0;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        /* Feature Highlights */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid #e5e7eb;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(37, 99, 235, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--gray-800);
+        }
+
+        .feature-desc {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 1.5rem 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.7rem;
+            }
+
+            .button {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.875rem;
+                width: 100%;
+            }
+        }
+
+        /* Custom Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Progress bar animation */
+        @keyframes progressBar {
+            0% { width: 0%; opacity: 0; }
+            20% { opacity: 1; }
+            100% { width: var(--progress); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main App Container -->
+    <div class="app-container">
+        <header>
+            <div class="logo">AI Content Moderation</div>
+            <h1>Hate Speech Detection System</h1>
+            <p class="subtitle">Enterprise-grade solution for identifying harmful language with state-of-the-art natural language processing</p>
+            
+            <div class="features">
+                <div class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Real-time Analysis</h3>
+                    <p class="feature-desc">Instant detection of hate speech and offensive content with low latency processing</p>
+                </div>
+                <div class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Context Awareness</h3>
+                    <p class="feature-desc">Understands context and nuance to reduce false positives</p>
+                </div>
+                <div class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Multi-language</h3>
+                    <p class="feature-desc">Supports detection in multiple languages with high accuracy</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="error" id="error"></div>
+
+                <div class="input-section">
+                    <label for="textInput" class="input-label">Text to Analyze</label>
+                    <textarea id="textInput" placeholder="Enter text to analyze for hate speech or offensive content..."></textarea>
+
+                    <button class="button" onclick="analyzeText()">
+                        Analyze Content
+                        <span class="loading" id="loading" style="display: none;"></span>
+                    </button>
+                </div>
+
+                <div class="result-container">
+                    <div id="result" class="result">
+                        <h2>Analysis Results</h2>
+                        <div class="result-content">
+                            <div class="result-item">
+                                <span class="result-label">Original Content</span>
+                                <p id="originalText" class="result-value"></p>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Classification</span>
+                                <div id="prediction" class="prediction">
+                                    <span class="prediction-icon"></span>
+                                    <span class="prediction-text"></span>
+                                </div>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Confidence Level</span>
+                                <div class="confidence-meter">
+                                    <div class="meter-container">
+                                        <div class="meter-bar" style="width: 0%"></div>
+                                    </div>
+                                    <span class="meter-value">0%</span>
+                                </div>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Detailed Analysis</span>
+                                <div id="threatAnalysis" class="result-value"></div>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Recommended Actions</span>
+                                <div id="recommendedActions" class="result-value"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>© <span id="year"></span> AI Content Moderation System | Enterprise NLP Solution</p>
+        </footer>
+    </div>
+
+    <script>
+        // Set current year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Analyze function
+        function analyzeText() {
+            const text = document.getElementById('textInput').value.trim();
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const errorElement = document.getElementById('error');
+            const button = document.querySelector('.button');
+            const predictionText = document.querySelector('.prediction-text');
+            const threatAnalysis = document.getElementById('threatAnalysis');
+            const recommendedActions = document.getElementById('recommendedActions');
+
+            // Reset UI
+            errorElement.style.display = 'none';
+            result.style.display = 'none';
+            button.disabled = true;
+            loading.style.display = 'inline-block';
+
+            if (!text) {
+                showError('Please enter text to analyze.');
+                return;
+            }
+
+            if (text.length > 1000) {
+                showError('For demo purposes, please limit text to 1000 characters.');
+                return;
+            }
+
+            // Show loading state
+            button.textContent = 'Analyzing...';
+
+            // Simulate API call with timeout
+            setTimeout(() => {
+                try {
+                    // This is a simulation - in a real app, you would call your actual API
+                    const data = simulateAPICall(text);
+                    
+                    // Display results
+                    document.getElementById('originalText').textContent = data.text;
+                    predictionText.textContent = data.prediction;
+
+                    // Set appropriate class
+                    const predictionElement = document.getElementById('prediction');
+                    predictionElement.className = 'prediction ';
+                    if (data.prediction.includes('Hate')) {
+                        predictionElement.classList.add('hate');
+                        threatAnalysis.innerHTML = `
+                            <p>This content has been identified as <strong>hate speech</strong> with high confidence.</p>
+                            <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                                <li>Contains targeted harmful language</li>
+                                <li>Promotes discrimination or violence</li>
+                                <li>Violates community guidelines</li>
+                            </ul>
+                        `;
+                        recommendedActions.innerHTML = `
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <span style="background: rgba(220, 38, 38, 0.1); color: var(--danger); padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem;">Immediate Removal</span>
+                                <span style="background: rgba(220, 38, 38, 0.1); color: var(--danger); padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem;">User Suspension</span>
+                                <span style="background: rgba(220, 38, 38, 0.1); color: var(--danger); padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem;">Content Review</span>
+                            </div>
+                        `;
+                    } else if (data.prediction.includes('Offensive')) {
+                        predictionElement.classList.add('offensive');
+                        threatAnalysis.innerHTML = `
+                            <p>This content contains <strong>potentially offensive language</strong> that may violate community guidelines.</p>
+                            <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                                <li>Includes profanity or slurs</li>
+                                <li>May be considered inappropriate</li>
+                                <li>Could create hostile environment</li>
+                            </ul>
+                        `;
+                        recommendedActions.innerHTML = `
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <span style="background: rgba(245, 158, 11, 0.1); color: var(--warning); padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem;">Content Flagging</span>
+                                <span style="background: rgba(245, 158, 11, 0.1); color: var(--warning); padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem;">User Warning</span>
+                                <span style="background: rgba(245, 158, 11, 0.1); color: var(--warning); padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem;">Context Review</span>
+                            </div>
+                        `;
+                    } else {
+                        predictionElement.classList.add('clean');
+                        threatAnalysis.innerHTML = `
+                            <p>No harmful content detected. This text appears to be safe for publication.</p>
+                            <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                                <li>No hate speech detected</li>
+                                <li>No offensive language identified</li>
+                                <li>Meets community guidelines</li>
+                            </ul>
+                        `;
+                        recommendedActions.innerHTML = `
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <span style="background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem;">No Action Needed</span>
+                                <span style="background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem;">Approved Content</span>
+                            </div>
+                        `;
+                    }
+
+                    // Update confidence meter
+                    updateConfidenceMeter(data.confidence);
+
+                    // Show result with animation
+                    result.style.display = 'block';
+                    result.classList.add('animate__animated', 'animate__fadeInUp');
+
+                    // Reset button
+                    button.textContent = 'Analyze Content';
+                    button.disabled = false;
+                    loading.style.display = 'none';
+                } catch (error) {
+                    showError('An error occurred during analysis. Please try again.');
+                    console.error('Error:', error);
+                }
+            }, 1500); // Simulated API delay
+
+            function showError(message) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+                errorElement.classList.add('animate__animated', 'animate__shakeX');
+                button.textContent = 'Try Again';
+                button.disabled = false;
+                loading.style.display = 'none';
+                
+                // Remove animation class after it completes to allow re-animation
+                setTimeout(() => {
+                    errorElement.classList.remove('animate__animated', 'animate__shakeX');
+                }, 1000);
+            }
+        }
+
+        // Simulate API call with different responses based on input
+        function simulateAPICall(text) {
+            // Simple detection logic for demo purposes
+            const lowerText = text.toLowerCase();
+            let prediction, confidence;
+            
+            // Check for hate speech indicators
+            if (containsHateSpeech(lowerText)) {
+                prediction = 'Hate Speech Detected';
+                confidence = Math.floor(Math.random() * 20) + 80; // 80-100%
+            } 
+            // Check for offensive language
+            else if (containsOffensiveLanguage(lowerText)) {
+                prediction = 'Offensive Language Detected';
+                confidence = Math.floor(Math.random() * 30) + 60; // 60-90%
+            } 
+            // Clean content
+            else {
+                prediction = 'Clean Content';
+                confidence = Math.floor(Math.random() * 30) + 70; // 70-100%
+            }
+            
+            return {
+                text: text,
+                prediction: prediction,
+                confidence: confidence
+            };
+        }
+        
+        function containsHateSpeech(text) {
+            const hateTerms = ['hate', 'kill all', 'death to', 'exterminate', 'genocide', 'racial slur', 
+                               'ethnic slur', 'religious slur', 'white power', 'black power', 'supremacist',
+                               'nazi', 'kkk', 'gas the', 'holocaust denial', 'lynch', 'rape all'];
+            return hateTerms.some(term => text.includes(term));
+        }
+        
+        function containsOffensiveLanguage(text) {
+            const offensiveTerms = ['fuck', 'shit', 'bitch', 'asshole', 'cunt', 'dick', 'piss off', 
+                                   'damn', 'bastard', 'douche', 'whore', 'slut', 'retard', 'idiot',
+                                   'moron', 'screw you', 'fag', 'faggot', 'hell', 'suck my'];
+            return offensiveTerms.some(term => text.includes(term));
+        }
+
+        function updateConfidenceMeter(percent) {
+            const meterBar = document.querySelector('.meter-bar');
+            const meterValue = document.querySelector('.meter-value');
+
+            // Reset animation
+            meterBar.style.width = '0%';
+            meterBar.style.transition = 'none';
+            void meterBar.offsetWidth; // Trigger reflow
+            
+            // Set new width with animation
+            meterBar.style.transition = 'width 1s ease, background-color 1s ease';
+            meterBar.style.width = `${percent}%`;
+            meterValue.textContent = `${percent}%`;
+
+            // Color based on percentage
+            if (percent > 80) {
+                meterBar.style.backgroundColor = 'var(--danger)';
+            } else if (percent > 60) {
+                meterBar.style.backgroundColor = 'var(--warning)';
+            } else {
+                meterBar.style.backgroundColor = 'var(--success)';
+            }
+        }
+
+        // Allow Enter key to submit (but not Shift+Enter)
+        document.getElementById('textInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                analyzeText();
+            }
+        });
+    </script>
+</body>
+</html>
